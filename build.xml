@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<project name="wowza_external_playlists" default="jar">
+
+<property name="wowza.lib.dir" value="lib"/>
+<property name="playlist.jar" value="${wowza.lib.dir}/${ant.project.name}.jar"/>
+<property name="build.dir" value="build"/>
+
+<target name="clean">
+  <delete failonerror="false" file="${playlist.jar}"/>
+</target>
+
+<target name="init">
+  <mkdir dir="${build.dir}"/>
+</target>
+
+<target name="build" depends="init, -link-lib-dir">
+  <javac destdir="${build.dir}" srcdir="./src">
+    <classpath>
+      <fileset dir="lib">
+        <include name="*.jar"/>
+      </fileset>
+    </classpath>
+  </javac>
+</target>
+
+<target name="jar" depends="build">
+  <jar jarfile="${playlist.jar}">
+    <fileset dir="${build.dir}">
+      <include name="**"/>
+    </fileset>
+  </jar>
+</target>
+
+<available property="lib.file.exists" file="lib"/>
+<target name="-link-lib-dir" unless="lib.file.exists">
+  <symlink link="./lib" resource="/usr/local/WowzaMediaServer/lib"/>
+</target>
+
+</project>
