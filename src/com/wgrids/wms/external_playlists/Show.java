@@ -17,6 +17,8 @@ import com.wowza.wms.stream.publish.IStreamActionNotify;
 import com.wowza.wms.stream.publish.PlaylistItem;
 import com.wowza.wms.stream.publish.Stream;
 import com.wowza.wms.vhost.ThreadPool;
+import com.wowza.wms.amf.AMFDataMixedArray;
+import com.wowza.wms.amf.AMFDataItem;
 
 public class Show extends com.wowza.wms.stream.publish.Stream implements IStreamActionNotify {
     private static final WMSLogger logger = WMSLoggerFactory.getLogger(Show.class);
@@ -148,6 +150,18 @@ public class Show extends com.wowza.wms.stream.publish.Stream implements IStream
 	public void onPlaylistItemStart(Stream stream, PlaylistItem item) 
 	{
 		WMSLoggerFactory.getLogger(null).info("Item Started: " + item.getName() + "on Stream: " + stream.getName());
+		send_stream_title();
+	}
+	private void send_stream_title() {
+		AMFDataMixedArray data = new AMFDataMixedArray();
+		try {
+			String stream_title = current_track.getString("stream_title");
+			byte[] title2 = stream_title.getBytes(java.nio.charset.Charset.defaultCharset().name());
+			data.put("StreamTitle", new AMFDataItem(new String(title2, "UTF-8")));
+			stream.getPublisher().getStream().send("onMetaData", data);
+		} catch (java.io.UnsupportedEncodingException e) {
+		} catch (JSONException e) {}
+
 	}
 	
 	/**
