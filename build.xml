@@ -14,7 +14,7 @@
 </target>
 
 <target name="build" depends="init, -link-lib-dir">
-  <javac destdir="${build.dir}" srcdir="./src">
+  <javac destdir="${build.dir}" srcdir="./src" target="1.6" source="1.6">
     <classpath>
       <fileset dir="lib">
         <include name="*.jar"/>
