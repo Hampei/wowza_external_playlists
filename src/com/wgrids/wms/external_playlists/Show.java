@@ -74,9 +74,13 @@ public class Show extends com.wowza.wms.stream.publish.Stream implements IStream
 			last_action = "get next track";
 			current_track = new JSONObject(get_url(pop_url));
 			WMSLoggerFactory.getLogger(null).info(current_path() + " on " + id);
-			stream.play("mp3:" + current_path(), 0, -1, true);
+			boolean success = stream.play("mp3:" + current_path(), 0, -1, true);
 			pop_error = false;
 			last_action = "play " + current_path();
+			if (!success) {
+			  last_action = "failed play " + current_path();
+			  schedule_play_next_track();
+			}
 			
 		} catch (Callback404Exception e) {
 			last_action = "remove show";
