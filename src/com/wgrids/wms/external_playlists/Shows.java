@@ -33,6 +33,7 @@ public class Shows implements IServerNotify2 {
 //			Show s = shows.get(id);
 //			s.check_playing();
 			// for now do nothing, the play loop should never end unless with a stream destroy.
+			WMSLoggerFactory.getLogger(null).info("Show already exists: " + sid);
 		} else {
 			Show show = new Show(app, id, pop_url);
 			shows.put(sid, show);

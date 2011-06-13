@@ -42,8 +42,7 @@ public class Show extends com.wowza.wms.stream.publish.Stream implements IStream
 	 */
 	Show(IApplication app, String id, String pop_url)
 	{
-		IApplicationInstance appInstance = app.getAppInstance("_definst_");
-		stream = Show.createInstance(appInstance, id);
+		stream = Show.createInstance(app.getVHost(), app.getName(), id);
 		stream.setRepeat(false);
 		stream.addListener(this);
 		this.pop_url = pop_url;
@@ -176,28 +175,31 @@ public class Show extends com.wowza.wms.stream.publish.Stream implements IStream
 	 * @throws Callback404Exception when 404 is returned by the other side. 
 	 */
 	public String get_url(String url) throws IOException, Callback404Exception {
-		String ret = "";
-        URL u = new URL(url);
-        HttpURLConnection uc = (HttpURLConnection) u.openConnection();
+		URL u = new URL(url);
+		HttpURLConnection uc = (HttpURLConnection) u.openConnection();
 		uc.setConnectTimeout(5000);
 		uc.setReadTimeout(5000);
+		WMSLoggerFactory.getLogger(null).debug("get url: >" + url + "<");
 
-        if( uc.getResponseCode() == 404) {
-           	WMSLoggerFactory.getLogger(null).info("404 returned");
-          	throw new Callback404Exception(id);
-        }
-        
-        BufferedReader in = new BufferedReader(new InputStreamReader(
-          uc.getInputStream()));
-        String inputLine;
+		if( uc.getResponseCode() == 404) {
+			WMSLoggerFactory.getLogger(null).info("404 returned");
+			throw new Callback404Exception(id);
+		}
 
-        while ((inputLine = in.readLine()) != null) 
-            ret += inputLine;
-        in.close();
-        WMSLoggerFactory.getLogger(null).debug(ret);
-        return ret;
+		return slurp(uc.getInputStream());
 	}
-	
+
+	private String slurp(java.io.InputStream istream) throws IOException {
+		String ret = "";
+		BufferedReader in = new BufferedReader(new InputStreamReader(istream));
+		String inputLine;
+
+		while ((inputLine = in.readLine()) != null)
+			ret += inputLine;
+		in.close();
+		return ret;
+	}
+
 	public class Callback404Exception extends java.lang.Exception {
 		private static final long serialVersionUID = 1L;
 
