@@ -20,7 +20,7 @@ import com.wowza.wms.vhost.ThreadPool;
 import com.wowza.wms.amf.AMFDataMixedArray;
 import com.wowza.wms.amf.AMFDataItem;
 
-public class Show extends com.wowza.wms.stream.publish.Stream implements IStreamActionNotify {
+public class Show implements IStreamActionNotify {
     private static final WMSLogger logger = WMSLoggerFactory.getLogger(Show.class);
 	private Stream stream = null;
 	private String pop_url = null;
@@ -42,7 +42,7 @@ public class Show extends com.wowza.wms.stream.publish.Stream implements IStream
 	 */
 	Show(IApplication app, String id, String pop_url)
 	{
-		stream = Show.createInstance(app.getVHost(), app.getName(), id);
+		stream = Stream.createInstance(app.getVHost(), app.getName(), id);
 		stream.setRepeat(false);
 		stream.addListener(this);
 		this.pop_url = pop_url;
@@ -209,9 +209,13 @@ public class Show extends com.wowza.wms.stream.publish.Stream implements IStream
 	}
 
 	public void close() {
-		super.close();
 		closed = true;
+		stream.removeListener(this);
+		stream.getPublisher().unpublish();
 		stream.close();
+
+		stream = null;
+		app = null;
 	}
 
 	{
